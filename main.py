@@ -132,6 +132,7 @@ class Terminal:
     def __init__(self):
         self.input_text = ""
         self.history = []
+        
 
     def add_line(self, text: str):
         self.history.append(text)
@@ -171,6 +172,7 @@ class HacknetSimulator:
         self.ids_enabled = True
         self.defense_bonus = 0
         self.day_tick = 0.0
+        self.critical_alert_shown = False
 
     def _create_nodes(self) -> List[Node]:
         return [
@@ -319,6 +321,7 @@ class HacknetSimulator:
                 self.log(f"[DURATION] {int(attack.duration)} seconds")
 
     def reset_system(self):
+        self.critical_alert_shown = False
         for node in self.nodes:
             node.status = "normal" if node.kind not in {"defense", "monitor"} else "protected"
             node.hp = node.max_hp
@@ -400,11 +403,19 @@ class HacknetSimulator:
             self.update_nodes_from_threat()
 
         if self.overall_threat >= 100:
-            self.log("Critical threat level reached!" )
+
             self.overall_threat = 100
+
+            if not self.critical_alert_shown:
+
+                self.log("[CRITICAL] Threat level reached maximum.")
+
+                self.critical_alert_shown = True
 
 
     def finish_attack(self, attack):
+
+        self.critical_alert_shown = False
 
         self.auto_attack = False
 
